@@ -1,0 +1,130 @@
+Garbage Collector (GC) to automatyczny sprzątacz pamięci w Pythonie. Jego zadanie to usuwać obiekty, których już nikt nie używa, żeby zwolnić pamięć RAM.
+
+🎯 Prosta analogia:
+Wyobraź sobie, że obiekty to balony, a zmienne to sznurki, którymi je trzymasz:
+
+python
+x = [1, 2, 3]  # Trzymasz balon za sznurek 'x'
+y = x          # Drugi sznurek 'y' do tego samego balona
+text
+    🎈 [1, 2, 3]
+    ↑     ↑
+    x     y       (dwa sznurki trzymają balon)
+Jak działa Garbage Collector?
+1. Liczenie referencji (Reference Counting)
+Python liczy, ile zmiennych wskazuje na dany obiekt:
+
+python
+import sys
+
+lista = [1, 2, 3]
+print(sys.getrefcount(lista))  # 2 (lista + argument funkcji)
+
+x = lista
+print(sys.getrefcount(lista))  # 3 (lista + x + argument)
+
+y = lista
+print(sys.getrefcount(lista))  # 4 (coraz więcej referencji)
+2. Kiedy obiekt jest usuwany?
+Gdy licznik referencji spada do 0 - nikt już nie trzyma balona:
+
+python
+x = [1, 2, 3]  # Licznik = 1
+y = x          # Licznik = 2
+x = None       # Licznik = 1 (x już nie wskazuje)
+y = "Hello"    # Licznik = 0 → 🗑️ GC USUWA OBIEKT!
+Wizualizacja:
+
+text
+Krok 1: x ─────> [1,2,3]  (licznik=1)
+
+Krok 2: x ──┐
+            ├──> [1,2,3]  (licznik=2)
+        y ──┘
+
+Krok 3: x ─────> None
+        y ─────> [1,2,3]  (licznik=1)
+
+Krok 4: x ─────> None
+        y ─────> "Hello"  
+                 🗑️ [1,2,3] usunięty! (licznik=0)
+Przykład z życia:
+python
+def tworz_duza_liste():
+    duza_lista = list(range(1000000))  # Zajmuje pamięć
+    return duza_lista
+
+# Obiekt istnieje
+wynik = tworz_duza_liste()  # Licznik = 1 (zmienna 'wynik')
+
+# Obiekt do usunięcia
+wynik = None  # Licznik = 0 → GC sprząta!
+Problem: Cykliczne referencje 🔄
+Czasem liczenie referencji nie wystarcza:
+
+python
+class Osoba:
+    pass
+
+a = Osoba()
+b = Osoba()
+a.przyjaciel = b  # a wskazuje na b
+b.przyjaciel = a  # b wskazuje na a
+
+# Teraz usuwamy zmienne:
+a = None
+b = None
+# Ale obiekty dalej istnieją! Wskazują na siebie nawzajem!
+Wizualizacja:
+
+text
+a ─────> 👤A ──przyjaciel──> 👤B
+                         ┌───┘
+b ─────> 👤B ──przyjaciel──┘
+
+Po a=None, b=None:
+👤A ──przyjaciel──> 👤B
+👤B ──przyjaciel──> 👤A
+(żadna zmienna nie wskazuje, ale one wskazują na siebie!)
+Rozwiązanie: GC z wykrywaniem cykli
+Python ma drugi mechanizm - specjalny wykrywacz cykli, który znajduje takie "wyspy śmieci" i je usuwa:
+
+python
+import gc
+
+# Włączone automatycznie, ale można kontrolować:
+gc.collect()  # Ręczne odpalenie GC
+gc.disable()  # Wyłączenie (rzadko potrzebne)
+gc.enable()   # Włączenie
+Kiedy GC działa?
+✅ Automatycznie - nie musisz nic robić
+
+✅ Okresowo - Python sam decyduje kiedy
+
+✅ Gdy brakuje pamięci - przyspiesza działanie
+
+Praktyczne wskazówki:
+DOBRE ✅:
+python
+# Pozwól GC działać automatycznie
+def funkcja():
+    dane = wczytaj_duzy_plik()
+    wynik = przetworz(dane)
+    return wynik  # dane zostaną usunięte po wyjściu z funkcji
+NIEOPTYMALNE ❌:
+python
+# Trzymanie niepotrzebnych referencji
+globalna_lista = []
+
+def funkcja():
+    dane = wczytaj_duzy_plik()
+    globalna_lista.append(dane)  # Trzymasz na zawsze!
+    # GC nie usunie, bo globalna_lista wciąż wskazuje
+Podsumowanie:
+Co robi GC?	Jak?
+🗑️ Usuwa nieużywane obiekty	Gdy licznik referencji = 0
+🔍 Znajduje cykle	Specjalny algorytm wykrywania
+💾 Zwalnia pamięć	Automatycznie, w tle
+⏰ Kiedy działa?	Okresowo i gdy potrzeba
+Kluczowa myśl: W Pythonie nie musisz ręcznie zwalniać pamięci jak w C/C++. Garbage Collector robi to za Ciebie automatycznie. Ale pamiętaj o cyklicznych referencjach!
+
