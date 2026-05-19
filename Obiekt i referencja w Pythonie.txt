@@ -1,0 +1,118 @@
+W Pythonie wszystko jest obiektem, a zmienna to tylko referencja (wskaźnik) do obiektu w pamięci.
+
+📦 Obiekt = "pudełko z danymi"
+To realna rzecz w pamięci, która ma:
+
+1.Wartość (dane)
+2.Typ (co to jest)
+3.Miejsce w pamięci (adres)
+
+👉 Referencja = "strzałka wskazująca na obiekt"
+Zmienna to tylko etykieta/strzałka, która pokazuje na obiekt. Nie przechowuje danych, tylko adres!
+
+python:
+x = [1, 2, 3]  # x to referencja do obiektu listy
+Wizualizacja:
+text
+Zmienna (referencja)          Obiekt w pamięci
+      x  ──────────>  [1, 2, 3]  (adres: 12345)
+                       ^^^^^^^^^
+                       To jest obiekt
+Kluczowy przykład - dlaczego to ważne:
+❌ BŁĘDNE myślenie (jak w innych językach):
+python:
+a = [1, 2, 3]
+b = a        # Myślisz: "kopiuję listę"
+b.append(4)  # Myślisz: "dodaję tylko do b"
+
+print(a)  # [1, 2, 3, 4]  - CO?! a też się zmieniło!
+print(b)  # [1, 2, 3, 4]
+✅ POPRAWNE myślenie (Python):
+python
+a = [1, 2, 3]   # a ─────> [1, 2, 3]
+b = a           # b ─────> [1, 2, 3]  (ten sam obiekt!)
+b.append(4)     # Dodaję do JEDYNEGO obiektu
+
+print(a)  # [1, 2, 3, 4]  - jasne! a wskazuje na ten sam obiekt
+print(b)  # [1, 2, 3, 4]  - b też wskazuje na ten sam obiekt
+Wizualizacja:
+
+text
+Przed b = a:
+a ─────> [1, 2, 3]  (obiekt w pamięci)
+b ─────> [1, 2, 3]  (jakoś wcześniej stworzony)
+
+Po b = a:
+a ──┐
+    ├──> [1, 2, 3]  (TEN SAM obiekt!)
+b ──┘
+Sprawdź ID obiektów:
+python
+a = [1, 2, 3]
+b = a
+
+print(id(a))  # np. 1407123456789
+print(id(b))  # np. 1407123456789  ← TO SAMO!
+print(a is b)  # True  ← to ten sam obiekt!
+Typy mutowalne vs niemutowalne:
+🔒 Niemutowalne (int, str, tuple):
+python
+x = 5
+y = x     # y wskazuje na to samo 5
+x = 10    # x TERAZ wskazuje na nowy obiekt 10
+          # y dalej wskazuje na stary obiekt 5
+
+print(x)  # 10
+print(y)  # 5   ← nie zmieniło się!
+Wizualizacja:
+
+text
+Na początku:
+x ──┐
+    ├──> 5
+y ──┘
+
+Po x = 10:
+x ─────> 10  (nowy obiekt!)
+y ─────> 5   (stary obiekt)
+🔓 Mutowalne (list, dict, set):
+python
+a = [1, 2, 3]
+b = a        # b wskazuje na TEN SAM obiekt
+a[0] = 99    # MODYFIKUJĘ obiekt (nie tworzę nowego!)
+
+print(a)  # [99, 2, 3]
+print(b)  # [99, 2, 3]  ← b też widzi zmianę!
+Praktyczne konsekwencje:
+1. Przekazywanie do funkcji:
+python
+def dodaj_element(lista):
+    lista.append(4)  # Modyfikuję oryginalny obiekt!
+
+moja_lista = [1, 2, 3]
+dodaj_element(moja_lista)
+print(moja_lista)  # [1, 2, 3, 4]  - zmieniła się!
+2. Jak zrobić prawdziwą kopię:
+python
+oryginał = [1, 2, 3]
+
+# Płytka kopia:
+kopia1 = oryginał.copy()
+kopia2 = list(oryginał)
+kopia3 = oryginał[:]
+
+# Głęboka kopia (dla zagnieżdżonych struktur):
+import copy
+kopia4 = copy.deepcopy(oryginał)
+
+kopia1.append(4)
+print(oryginał)  # [1, 2, 3]  - oryginał bez zmian!
+Podsumowanie:
+Pojęcie	Co to?	Przykład
+Obiekt	Dane w pamięci	[1, 2, 3]
+Referencja	Zmienna wskazująca na obiekt	x = [1, 2, 3]
+id()	Adres obiektu w pamięci	id(x) → 1407123...
+is	Sprawdza, czy to ten sam obiekt	x is y → True/False
+==	Sprawdza, czy wartości są równe	x == y → True/False
+Kluczowa myśl: W Pythonie zmienne to tylko etykiety przyklejone do obiektów. Jedna zmiana może wpłynąć na wiele zmiennych, jeśli wskazują na ten sam obiekt!
+
