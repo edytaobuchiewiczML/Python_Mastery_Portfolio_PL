@@ -1,0 +1,152 @@
+W Pythonie absolutnie wszystko jest obiektem - zarówno klasy, jak i ich instancje!
+
+📐 Schemat: Obiekty w Pythonie
+text
+W Pythonie OBIEKTAMI są:
+├── 📦 Instancje klas (np. obiekt klasy Osoba)
+├── 🏗️ Same klasy (np. klasa Osoba)
+├── 🔧 Funkcje i metody
+├── 📚 Moduły
+├── 🔢 Liczby, stringi, listy...
+└── 🎯 WSZYSTKO!
+1. Instancja klasy jako obiekt (to oczywiste)
+python
+class Samochod:
+    def __init__(self, marka):
+        self.marka = marka
+
+moje_auto = Samochod("Toyota")  # moje_auto to OBIEKT (instancja)
+print(type(moje_auto))  # <class 'Samochod'>
+print(id(moje_auto))    # 1407123456789 (adres w pamięci)
+2. Klasa też jest obiektem! 🏗️
+To kluczowa koncepcja - sama klasa też żyje w pamięci jako obiekt:
+
+python
+class Samochod:
+    marka = "Generic"
+    
+    def jedz(self):
+        print("Brum brum!")
+
+# Klasa to obiekt!
+print(type(Samochod))       # <class 'type'>
+print(id(Samochod))         # 2897654321 (adres w pamięci)
+print(isinstance(Samochod, object))  # True! Klasa dziedziczy po object
+Dowód: Klasa to obiekt
+python
+class Kot:
+    def mialcz(self):
+        print("Miau!")
+
+# 1. Klasa ma swój typ
+print(type(Kot))  # <class 'type'>
+
+# 2. Klasa ma swoje ID (miejsce w pamięci)
+print(id(Kot))    # jakiś adres
+
+# 3. Klasę można przypisać do zmiennej (jak każdy obiekt!)
+NowaNazwa = Kot
+mój_kot = NowaNazwa()  # Działa!
+mój_kot.mialcz()       # "Miau!"
+
+# 4. Klasę można przekazać jako argument
+def pokaz_typ(obiekt):
+    print(f"Typ: {type(obiekt)}")
+
+pokaz_typ(Kot)     # Typ: <class 'type'>
+pokaz_typ(Kot())   # Typ: <class 'Kot'>
+
+# 5. Klasa ma swoje atrybuty (jak obiekt!)
+print(dir(Kot))  # ['__class__', '__dict__', '__doc__', ...]
+Struktura w pamięci:
+text
+Pamięć RAM:
+┌──────────────────────────────┐
+│ OBIEKT KLASY "Samochod":     │
+│ - adres: 1000                │
+│ - typ: <class 'type'>        │
+│ - atrybuty: marka, jedz()   │
+└──────────────────────────────┘
+         ↑
+         │ tworzy
+         │
+┌──────────────────────────────┐
+│ OBIEKT INSTANCJI:            │
+│ - adres: 2000                │
+│ - typ: <class 'Samochod'>    │
+│ - atrybuty: marka="Toyota"   │
+└──────────────────────────────┘
+Oba są obiektami, tylko innego typu!
+
+Metaklasy - czyli skąd się biorą klasy
+Skoro klasa to obiekt, to musi mieć swoją klasę:
+
+python
+class MojaKlasa:
+    pass
+
+# Hierarchia tworzenia:
+obiekt = MojaKlasa()
+print(type(obiekt))      # <class 'MojaKlasa'>
+
+print(type(MojaKlasa))   # <class 'type'>
+                          # ^^^ 'type' to metaklasa!
+                          # 'type' tworzy wszystkie klasy
+Praktyczne konsekwencje:
+1. Klasy można tworzyć dynamicznie:
+python
+# Normalnie:
+class Osoba:
+    imie = "Anna"
+
+# Dynamicznie (bo klasa to obiekt!):
+Osoba = type('Osoba', (), {'imie': 'Anna'})
+# To to samo! type() tworzy nowy obiekt klasy
+
+os = Osoba()
+print(os.imie)  # "Anna"
+2. Klasy można modyfikować w runtime:
+python
+class Pusta:
+    pass
+
+# Dodajemy metodę do klasy (bo to obiekt!)
+Pusta.nowa_metoda = lambda self: print("Dodane później!")
+
+obiekt = Pusta()
+obiekt.nowa_metoda()  # "Dodane później!"  - DZIAŁA!
+3. Atrybuty klas vs instancji:
+python
+class Pies:
+    gatunek = "ssak"  # Atrybut OBIEKTU KLASY
+    
+    def __init__(self, imie):
+        self.imie = imie  # Atrybut OBIEKTU INSTANCJI
+
+# Oba są obiektami, oba mają atrybuty:
+print(Pies.gatunek)     # "ssak" (z obiektu klasy)
+print(Pies.__dict__)    # słownik atrybutów klasy
+
+azor = Pies("Azor")
+print(azor.imie)        # "Azor" (z obiektu instancji)
+print(azor.__dict__)    # słownik atrybutów instancji
+Wizualizacja pełnej hierarchii:
+text
+type (metaklasa) ─── tworzy ──> type ─── tworzy ──> object
+    ↑                              ↑                    ↑
+    │                              │                    │
+    │                         MojaKlasa ──tworzy──> instancja
+    │                              ↑                    ↑
+    │                              │                    │
+    └─── też jest typu ────────────┘                    │
+                                                        │
+    (wszystko ostatecznie dziedziczy z object) ──────────┘
+Podsumowanie:
+Co?	              Czy to obiekt?    	Typ      	Przykład
+5	✅             Tak	                int	      type(5) → <class 'int'>
+"hello"	✅       Tak	                str	      type("hello") → <class 'str'>
+[1,2,3]	✅       Tak                	list	    type([1,2,3]) → <class 'list'>
+Instancja	✅     Tak	                NazwaKlasy	type(Osoba()) → <class 'Osoba'>
+Klasa	✅ Tak	type	type(Osoba) → <class 'type'>
+type	✅ Tak	type	type(type) → <class 'type'>
+Kluczowa myśl: W Pythonie WSZYSTKO jest obiektem - liczby, stringi, funkcje, klasy, instancje, a nawet sam type. Klasa to po prostu obiekt typu type, który potrafi tworzyć inne obiekty (instancje).
